@@ -5,6 +5,11 @@ import Subject from './components/Subject';
 import './App.css';
 
 /*
+  render()보다 먼저 실행되면서 해당 컴포넌트를 초기화하고 싶은 코드는
+  constructor()에 작성함 
+ */
+
+/*
   render()는 함수. 
   우리가 알고 있는 일반적인 함수는 앞에 function 키워드가 붙지만
   자바스크립트의 최신 스펙에 들어있는 클래스 문법은 소속되는 함수의 function 키워드를 생략함.
@@ -19,11 +24,18 @@ import './App.css';
      JSX로 코드를 작성하면 Create React App이 알아서 자바스크립트 코드로 변환해줌
 */
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      subject: {title: 'WEB', sub: 'World Wide Web!'}
+    }
+  }
   render() {
     return (
       <div className="App">
-        <Subject title="WEB" sub="world wide web!"/>
-        <Subject title="React" sub="For UI"/>
+        <Subject 
+          title={this.state.subject.title} 
+          sub={this.state.subject.sub}/>
         <TOC/>
         <Content title="HTML" desc="HTML is HyperText Markup Language."/>
       </div>
