@@ -12,8 +12,17 @@ import React, { Component } from "react"
   (나머지 인자는 한칸씩 뒤로 밀리게 됨)
 */
 class TOC extends Component {
-    shouldComponentUpdate() {
-      console.log("==>TOC render shouldComponentUpdate");
+    /*
+      render() 이전에 shouldComponentUpdate()가 실행됨
+      shouldComponentUpdate()의 반환값이 true이면 render()가 호출되고
+      false이면 render()가 호출되지 않음
+      shouldComponentUpdate()을 통해 새롭게 바뀐 값과 이전 값에 접근할 수 있음
+    */
+    shouldComponentUpdate(newProps, newState) {
+      console.log("==>TOC render shouldComponentUpdate", newProps.data, this.props.data);
+      if(this.props.data === newProps.data) {
+        return false;
+      }
       return true;
     }
     render() {

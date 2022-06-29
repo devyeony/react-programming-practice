@@ -87,10 +87,20 @@ class App extends Component {
       _article = <CreateContent onSubmit={function(_title, _desc) {
         this.max_content_id = this.max_content_id + 1;
 
-        // 배열에서 push()는 원본 변경, concat()은 원본 변경 없이 새로운 배열 반환
-        var _contents = this.state.contents.concat(
-          {id: this.max_content_id, title: _title, desc: _desc}
-        );
+        /*
+          배열에서 push()는 원본 변경, concat()은 원본 변경 없이 새로운 배열 반환
+          Array.from -> 배열 복사
+          Object.assign -> 객체 복사
+          참고) 객체 불변성 관련 라이브러리 : immutable.js
+        */
+        // var _contents = this.state.contents.push(
+        //   {id: this.max_content_id, title: _title, desc: _desc}
+        // );
+        // var _contents = this.state.contents.concat(
+        //   {id: this.max_content_id, title: _title, desc: _desc}
+        // );
+        var _contents = Arrays.from(this.state.contents);
+        _contents.push({id: this.max_content_id, title: _title, desc: _desc});
         this.setState({
           contents: _contents
         });
