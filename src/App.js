@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import TOC from './components/TOC';
 import ReadContent from './components/ReadContent';
 import CreateContent from './components/CreateContent';
+import UpdateContent from './components/UpdateContent';
 import Subject from './components/Subject';
 import Control from './components/Control';
 import './App.css';
@@ -55,34 +56,26 @@ class App extends Component {
     }
   }
 
-  /*
-    render() 내에서는 this는 컴포넌트를 가리킴. 하지만 이벤트 처리 함수 내의 this는 undefinded
-    - 자바스크립트에서 this는 함수 호출 방식에 의해 결정되기 때문
-    - 일반적으로 자바스크립트에서 this는 window 객체가 됨(노드에서는 global)
-    - 즉, 자바스크립트에서 this는 해당 함수를 호출한 측임
-    - strict mode에서는 함수 내의 this에 window 객체를 디폴트로 바인딩해주지 않으므로 bind()로 직접 지정해주지 않으면 this는 undefined가 됨
-    이렇게 this 값이 없을 때는 bind()로 this를 주입해줘야 함. 
-    관련 리액트 문서 : https://ko.reactjs.org/docs/handling-events.html
-  */
-  render() {
-    console.log('App render');
+  getReadContent() {
+    var i = 0;
+    while(i < this.state.contents.length) {
+      var data = this.state.contents[i];
+      if(data.id === this.state.selected_content_id) {
+        return data;
+      }
+      i = i + 1;
+    }
+  }
+
+  getContent() {
     var _title, _desc, _article = null;
     if(this.state.mode === 'welcome') {
       _title = this.state.welcome.title;
       _desc = this.state.welcome.desc;
       _article = <ReadContent title={_title} desc={_desc} />
     } else if(this.state.mode === 'read') {
-      var i = 0;
-      while(i < this.state.contents.length) {
-        var data = this.state.contents[i];
-        if(data.id === this.state.selected_content_id) {
-          _title = data.title;
-          _desc = data.desc;
-          break;
-        }
-        i = i + 1;
-      }
-      _article = <ReadContent title={_title} desc={_desc} />
+      var _content = this.getReadContent();
+      _article = <ReadContent title={_content.title} desc={_content.desc} />
     } else if(this.state.mode === 'create') {
       _article = <CreateContent onSubmit={function(_title, _desc) {
         this.max_content_id = this.max_content_id + 1;
@@ -106,9 +99,34 @@ class App extends Component {
         });
         console.log(_title, _desc);
       }.bind(this)} />
-
-      console.log("render", this)
+    } else if(this.state.mode === 'update') {
+      var _content = this.getReadContent();
+      _article = <UpdateContent data={_content} onSubmit = {function(_title, _desc) {
+        this.max_content_id = this.max_content_id + 1;
+        var _contents = this.state.contents.concat(
+          {id: this.max_content_id, title: _title, desc: _desc}
+        );
+        this.setState({
+          contents: _contents
+        });
+        console.log(_title, _desc);
+      }.bind(this)} />
     }
+    return _article;
+  }
+
+  /*
+    render() 내에서는 this는 컴포넌트를 가리킴. 하지만 이벤트 처리 함수 내의 this는 undefinded
+    - 자바스크립트에서 this는 함수 호출 방식에 의해 결정되기 때문
+    - 일반적으로 자바스크립트에서 this는 window 객체가 됨(노드에서는 global)
+    - 즉, 자바스크립트에서 this는 해당 함수를 호출한 측임
+    - strict mode에서는 함수 내의 this에 window 객체를 디폴트로 바인딩해주지 않으므로 bind()로 직접 지정해주지 않으면 this는 undefined가 됨
+    이렇게 this 값이 없을 때는 bind()로 this를 주입해줘야 함. 
+    관련 리액트 문서 : https://ko.reactjs.org/docs/handling-events.html
+  */
+  render() {
+    console.log('App render');
+
     return (
       /*
         컴포넌트를 만들 때는 반드시 하나의 최상위 태그로 시작해야 함.
@@ -143,7 +161,7 @@ class App extends Component {
           });
         }.bind(this)} />
 
-        {_article}
+        {this.getContent()}
 
       </div>
     );
