@@ -99,7 +99,7 @@ class App extends Component {
         // var _contents = this.state.contents.concat(
         //   {id: this.max_content_id, title: _title, desc: _desc}
         // );
-        var _contents = Arrays.from(this.state.contents);
+        var _contents = Array.from(this.state.contents);
         _contents.push({id: this.max_content_id, title: _title, desc: _desc});
         this.setState({
           contents: _contents
