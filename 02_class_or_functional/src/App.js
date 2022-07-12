@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import './App.css';
 
 function App() {
@@ -12,10 +12,16 @@ function App() {
 }
 
 /**
- * 함수에서도 props를 받을 수 있는데 this를 사용하지 않음
- * 첫번째 파라미터에 인자값으로 props 값을 전달하도록 약속되어 있음(다른 이름이어도 OK!)
- * 함수의 인자를 추가하고 그 인자를 사용해서 외부에서 전달된 initNumber 값 사용 가능
+   함수에서도 props를 받을 수 있는데 this를 사용하지 않음
+   첫번째 파라미터에 인자값으로 props 값을 전달하도록 약속되어 있음(다른 이름이어도 OK!)
+   함수의 인자를 추가하고 그 인자를 사용해서 외부에서 전달된 initNumber 값 사용 가능
+
+   ===============================================================================
+
+
  */
+var funcStyle = 'color:blue';
+var funcId = 0;
 function FuncComp(props) {
   // useState의 반환값은 길이가 2인 배열
   var numberState = useState(props.initNumber);
@@ -28,6 +34,21 @@ function FuncComp(props) {
   // var setDate = dateState[1];
   var [_date, setDate] = useState((new Date()).toString());
 
+  // 렌더링(main effect)과 상관없는 작업 = side effect
+  // useEffect()라는 훅은 1) 웹 페이지가 처음으로 렌더링되었을 때, 2) 그 다음 render()가 실행될 때마다 실행
+  // 클래스형 컴포넌트의 componentWillMount()나 componentDidUpdate()와 효과가 같음
+  // 여러개의 useEffect()를 설치할 수도 있음
+  useEffect(function() {
+    console.log('%cfunc => useEffect A (componentDidMount & componentDidUpdate) '+(++funcId), funcStyle);
+    document.title = number + ' : ' + _date;
+  });
+
+  useEffect(function() {
+    console.log('%cfunc => useEffect B (componentDidMount & componentDidUpdate) '+(++funcId), funcStyle);
+    document.title = number + ' : ' + _date;
+  });
+
+  console.log('%cfunc => render '+(++funcId), funcStyle);
   return (
     <div className="container">
       <h2>function style component</h2>
@@ -47,35 +68,54 @@ function FuncComp(props) {
   )
 }
 
+/*
+  클래스 방식에서는 라이프사이클에 따라 원하는 타이밍에 어떤 코드를 추가하고 싶으면
+  정해진 이름의 메서드를 구현해서 적당한 타이밍에 원하는 코드를 실행할 수 있음
+*/
 var classStyle = 'color:red';
 class ClassComp extends React.Component {
   state = {
     number:this.props.initNumber,
     date:(new Date()).toString()
   }
-  componentWillMount() {
-    console.log('%cclass => componentWillMount', classStyle);
+
+  /*
+    한 번의 렌더링 순서 : constructor() - componentWillMount() - render() - componentDidMount()  
+    상태 변경시 순서 : shouldComponentUpdate() - componentWillMount() - render() - componentDidMount() 
+
+    componentWillUnmount()는 컴포넌트가 소멸될 때 호출됨
+  */
+  componentWillMount() { // 리액트 17 버전 미만. 
+    // 페이지가 렌더링되기 전에 해야 할 일
+    // 리액트 17 이상에서는 componentWillMount()를 사용하려면 UNSAFE_componentWillMount()로 사용
+    console.log('%cclass => componentWillMount', classStyle); // console.log()에서 %c를 붙이는 것은 CSS 스타일을 추가하기 위함
   }
 
-  componentDidMount() {
+  componentDidMount() { // 리액트 17 버전 이상
+    // react를 실행하고 나서 화면에 뭔가 그려진 다음에 처리해야 할 일이 있을 때
+    // UI가 다 그려진 다음에 추가로 처리해야 하거나 네트워크에서 뭔가 내려받아 어떤 일을 처리해야 하는 코드를 넣음
     console.log('%cclass => componentDidMount', classStyle);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    // render()를 호출하기 전에 render()가 호출될 필요가 있는지 없는지를 결정
+    // true를 반환하면 render()를 호출하고, false를 반환하면 render()를 호출하지 않음
     console.log('%cclass => shouldComponentUpdate', classStyle);
     return true;
   }
 
-  componentWillUpdate(nextProps, nextState) {
+  componentWillUpdate(nextProps, nextState) { // 리액트 17 버전 미만. 
+    // 리액트 17 이상에서는 componentWillUpdate()를 사용하려면 UNSAFE_componentWillUpdate()로 사용
     console.log('%cclass => componentWillUpdate', classStyle);
     return true;
   }
 
-  componentDidUpdate(nextProps, nextState) {
+  componentDidUpdate(nextProps, nextState) { // 리액트 17 버전 이상
     console.log('%cclass => componentDidUpdate', classStyle);
   }
 
-  render() {
+  render() { 
+    // state가 바뀌거나 props가 바뀔 때마다 render() 호출
     console.log('%cclass => render', classStyle);
     return (
       <div className="container">
