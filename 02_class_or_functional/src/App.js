@@ -15,10 +15,6 @@ function App() {
    함수에서도 props를 받을 수 있는데 this를 사용하지 않음
    첫번째 파라미터에 인자값으로 props 값을 전달하도록 약속되어 있음(다른 이름이어도 OK!)
    함수의 인자를 추가하고 그 인자를 사용해서 외부에서 전달된 initNumber 값 사용 가능
-
-   ===============================================================================
-
-
  */
 var funcStyle = 'color:blue';
 var funcId = 0;
@@ -27,26 +23,51 @@ function FuncComp(props) {
   var numberState = useState(props.initNumber);
   var number = numberState[0]; // 첫번째 값은 state 값. 인자로 state의 초깃값을 지정함
   var setNumber = numberState[1]; // 두번째 값은 상태를 바꾸는 함수. 함수의 인자로 state 값을 전달.
-  console.log('numberState', numberState);
 
   // var dateState = useState((new Date()).toString());
   // var _date = dateState[0];
   // var setDate = dateState[1];
   var [_date, setDate] = useState((new Date()).toString());
 
+  // useEffect()의 두번째 인자로 빈 배열을 전달하면 componentDidMount()처럼 처음 1회는 실행되지만 그 다음부터는 더 이상 실행되지 않음
+  // 이 useEffect()의 clean up 함수는 componentWillUnmount()와 같은 효과
+  useEffect(function() {
+    console.log('%cfunc => useEffect (componentDidMount & componentDidUpdate) '+(++funcId), funcStyle);
+    document.title = number;
+    return function() {
+      console.log('%cfunc => useEffect return (componentDidMount & componentDidUpdate) '+(++funcId), funcStyle);
+    }
+  }, []);
+
   // 렌더링(main effect)과 상관없는 작업 = side effect
   // useEffect()라는 훅은 1) 웹 페이지가 처음으로 렌더링되었을 때, 2) 그 다음 render()가 실행될 때마다 실행
   // 클래스형 컴포넌트의 componentWillMount()나 componentDidUpdate()와 효과가 같음
   // 여러개의 useEffect()를 설치할 수도 있음
   useEffect(function() {
-    console.log('%cfunc => useEffect A (componentDidMount & componentDidUpdate) '+(++funcId), funcStyle);
-    document.title = number + ' : ' + _date;
-  });
+    console.log('%cfunc => useEffect number (componentDidMount & componentDidUpdate) '+(++funcId), funcStyle);
+    document.title = number;
+    /*
+      render()가 호출되고 useEffect()가 다시 실행되기 전에 뭔가 정리(clean-up)하는 작업이 필요할 경우,
+      반환값으로 함수를 전달하면 그 함수를 실행 (즉, 일종의 정리정돈 작업 수행 가능)
+    */
+    return function() {
+        console.log('%cfunc => useEffect number return (componentDidMount & componentDidUpdate) '+(++funcId), funcStyle);
+    }
+  }, [number]); // useEffect()는 두번째 인자로 전달받은 배열의 요소 내의 값의 상태가 바뀌었을 때만 첫번째 인자인 콜백 함수가 호출되도록 되어 있음
 
+  /*
+    바뀐 값에 대한 처리만 하게 함으로써 성능을 향상시킬 수 있는 useEffect()
+    clean up 함수도 마찬가지로 useEffect()의 두번째 인자로 전달된 배열의 요소에 포함된 값이 변경된 경우에만 clean up 함수 호출  
+    
+    useEffect()의 인자로 전달된 함수는 componentDidMount()와 componentDidUpdate()에 해당하는 타이밍에 두 번 호출됨
+  */
   useEffect(function() {
-    console.log('%cfunc => useEffect B (componentDidMount & componentDidUpdate) '+(++funcId), funcStyle);
-    document.title = number + ' : ' + _date;
-  });
+    console.log('%cfunc => useEffect _date (componentDidMount & componentDidUpdate) '+(++funcId), funcStyle);
+    document.title = _date;
+    return function() {
+      console.log('%cfunc => useEffect _date return (componentDidMount & componentDidUpdate) '+(++funcId), funcStyle);
+    }
+  }, [_date]);
 
   console.log('%cfunc => render '+(++funcId), funcStyle);
   return (
